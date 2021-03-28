@@ -4,7 +4,7 @@ import tqdm
 from PIL import Image
 from vizer.draw import draw_boxes
 from ssd.config.defaults import cfg
-from ssd.data.datasets import VOCDataset, MNISTDetection
+from ssd.data.datasets import VOCDataset, MNISTDetection, RDDDataset, TDT4265Dataset
 import argparse
 import numpy as np
 from ssd import torch_utils
@@ -19,6 +19,10 @@ def run_demo(cfg, ckpt, score_threshold, images_dir: pathlib.Path, output_dir: p
         class_names = VOCDataset.class_names
     elif dataset_type == "mnist": 
         class_names = MNISTDetection.class_names 
+    elif dataset_type == "tdt4265": 
+        class_names = TDT4265Dataset.class_names
+    elif dataset_type == "rdd2020":
+        class_names = RDDDataset.class_names
     else:
         raise NotImplementedError('Not implemented now.')
 
@@ -72,7 +76,7 @@ def main():
     parser.add_argument("--ckpt", type=str, default=None, help="Trained weights.")
     parser.add_argument("--score_threshold", type=float, default=0.7)
     parser.add_argument("--images_dir", default='demo/voc', type=str, help='Specify a image dir to do prediction.')
-    parser.add_argument("--dataset_type", default="voc", type=str, help='Specify dataset type. Currently support voc and coco.')
+    parser.add_argument("--dataset_type", default="voc", type=str, help='Specify dataset type.')
 
     parser.add_argument(
         "opts",

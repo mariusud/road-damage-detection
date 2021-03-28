@@ -86,7 +86,7 @@ class DatasetCatalog:
         },
         "rdd2020_val": {
             "data_dir": "RDD2020_filtered",
-            "split": "train"
+            "split": "val"
         }
 
     }

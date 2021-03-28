@@ -43,6 +43,14 @@ You will see a similar output:
 ```
 
 
+### Runtime analysis
+You can run:
+
+```bash
+python3 check_runtime.py configs/vgg_ssd300_voc0712.yaml
+```
+
+
 ## Deeper dive
 For assignment 4, you don't need to understand much about the repository. Just change the files as guided in assignment 4, and you should be fine.
 For the object detection task in the project, this introduction is to give you a better understanding.

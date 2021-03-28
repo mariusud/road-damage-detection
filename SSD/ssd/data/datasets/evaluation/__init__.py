@@ -3,7 +3,7 @@ import logging
 import os
 from datetime import datetime
 from ssd.data.datasets import VOCDataset
-from ssd.data.datasets import MNISTDetection
+from ssd.data.datasets import MNISTDetection, TDT4265Dataset, RDDDataset
 from .voc import voc_evaluation
 from .eval_detection_voc import eval_detection_voc
 
@@ -25,8 +25,8 @@ def evaluate(dataset, predictions, output_dir: pathlib.Path, **kwargs):
         return voc_evaluation(**args)
     if isinstance(dataset, MNISTDetection):
         return voc_detection_evaluation(**args)
-    elif isinstance(dataset, COCODataset):
-        return coco_evaluation(**args)
+    elif isinstance(dataset, (RDDDataset, TDT4265Dataset)):
+        return voc_detection_evaluation(**args)
     else:
         raise NotImplementedError
 

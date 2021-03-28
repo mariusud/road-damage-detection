@@ -2,9 +2,13 @@ from torch.utils.data import ConcatDataset
 from ssd.config.path_catlog import DatasetCatalog
 from .voc import VOCDataset
 from .mnist import MNISTDetection
+from .tdt4265 import TDT4265Dataset 
+from .rdd2020 import RDDDataset 
 _DATASETS = {
     'VOCDataset': VOCDataset,
     'MNISTDetection': MNISTDetection,
+    'TDT4265Dataset': TDT4265Dataset, 
+    "RDDDataset": RDDDataset 
 }
 
 
