@@ -58,6 +58,7 @@ class RDDDataset(torch.utils.data.Dataset):
                 ids.append(line.rstrip())
         return ids
 
+  
     def _get_annotation(self, image_id):
         annotation_file = os.path.join(self.data_dir, "Annotations", f"{image_id}.xml")
         boxes = []
