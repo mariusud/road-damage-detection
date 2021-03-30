@@ -12,7 +12,7 @@ DATASETS:
     TRAIN: ("rdd2020_train",)
     TEST: ("rdd2020_val", )
 SOLVER:
-    MAX_ITER: 15000
+    MAX_ITER: 5000
     GAMMA: 0.1
     BATCH_SIZE: 16
     MOMENTUM: 0.9

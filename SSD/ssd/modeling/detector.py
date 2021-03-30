@@ -6,8 +6,7 @@ from ssd.utils.model_zoo import load_state_dict_from_url
 from ssd import torch_utils
 import torchvision.models as models
 
-from ssd.modeling.backbone.test_resnet import ResNet
-from ssd.modeling.backbone.dawik import Model
+#from ssd.modeling.backbone.test_resnet import ResNet
 from ssd.modeling.backbone.resnet_experimental import ResNet_Experimental
 class SSDDetector(nn.Module):
     def __init__(self, cfg):
