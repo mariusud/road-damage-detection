@@ -1,7 +1,7 @@
 MODEL:
     NUM_CLASSES: 5
     BACKBONE:
-        NAME: 'resnet'
+        NAME: 'resnet_experimental'
         PRETRAINED: True
         OUT_CHANNELS: [1024, 512, 512, 256, 256, 256]
         INPUT_CHANNELS: 3
@@ -12,12 +12,12 @@ DATASETS:
     TRAIN: ("rdd2020_train",)
     TEST: ("rdd2020_val", )
 SOLVER:
-    MAX_ITER: 10000
+    MAX_ITER: 15000
     GAMMA: 0.1
     BATCH_SIZE: 16
     MOMENTUM: 0.9
     LR: 2e-3
-EVAL_STEP: 2500
+EVAL_STEP: 5000
 MODEL_SAVE_STEP: 2500
-OUTPUT_DIR: 'outputs/rdd_2020_resnet'
+OUTPUT_DIR: 'outputs/rdd_2020_resnet_experimental-l2norm'
 DATASET_DIR: "/work/datasets"
