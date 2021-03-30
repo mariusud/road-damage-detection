@@ -63,7 +63,7 @@ class ResNet_Experimental(nn.Module):
         
         '''
         
-        backbone = resnet50(pretrained=True)
+        backbone = resnet101(pretrained=True)
         
         # out of bank1 -> 1024 x 38 x 38
         # source https://github.com/NVIDIA/DeepLearningExamples/blob/master/PyTorch/Detection/SSD/src/model.py
@@ -168,4 +168,4 @@ class ResNet_Experimental(nn.Module):
 
             out.append(x)
 
-        return tuple(out_features)
+        return tuple(out)
