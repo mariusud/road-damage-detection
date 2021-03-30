@@ -1,11 +1,14 @@
 from torch import nn
 from ssd.modeling.backbone.vgg import VGG
-from ssd.modeling.backbone.basic import BasicModel
+from ssd.modeling.backbone.basic import BasicModel, Second_Improved_BasicModel
 from ssd.modeling.box_head.box_head import SSDBoxHead
 from ssd.utils.model_zoo import load_state_dict_from_url
 from ssd import torch_utils
+import torchvision.models as models
 
-
+from ssd.modeling.backbone.test_resnet import ResNet
+from ssd.modeling.backbone.dawik import Model
+from ssd.modeling.backbone.resnet_experimental import ResNet_Experimental
 class SSDDetector(nn.Module):
     def __init__(self, cfg):
         super().__init__()
@@ -31,11 +34,22 @@ class SSDDetector(nn.Module):
 def build_backbone(cfg):
     backbone_name = cfg.MODEL.BACKBONE.NAME
     if backbone_name == "basic":
-        model = BasicModel(cfg)
+        model = Second_Improved_BasicModel(cfg)
         return model
+    if backbone_name == "resnet_experimental":
+        return ResNet_Experimental(cfg)
+    if backbone_name == "resnet_50":
+        model = ResNet50(cfg)
+        return model
+    if backbone_name == "resnet":
+        return ResNet(cfg)
+
+    if backbone_name == "dawik":
+        return Model(cfg)
     if backbone_name == "vgg":
         model = VGG(cfg)
         if cfg.MODEL.BACKBONE.PRETRAINED:
+            print("using pretrained")
             state_dict = load_state_dict_from_url(
                 "https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth")
             model.init_from_pretrain(state_dict)
