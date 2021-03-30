@@ -19,5 +19,5 @@ SOLVER:
     LR: 2e-3
 EVAL_STEP: 5000
 MODEL_SAVE_STEP: 2500
-OUTPUT_DIR: 'outputs/rdd_2020_resnet_experimental-l2norm'
+OUTPUT_DIR: 'outputs/rdd_2020_resnet_experimental-custom'
 DATASET_DIR: "/work/datasets"

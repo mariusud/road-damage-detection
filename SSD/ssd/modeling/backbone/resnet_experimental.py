@@ -41,12 +41,7 @@ class ResNet_Experimental(nn.Module):
 
     def __init__(self, cfg):
         super().__init__()
-        # Loading the full Resnet 50 backbone. This means that the we are currently only
-        # importing the REsnet50s architecture. No weights or biases have been initialised.
-        # WE will be using Xavier initialisation for that
-        # Loading the full Resnet 50 backbone
-        #backbone = resnet50(pretrained=True)
-        self.out_channels = cfg.MODEL.BACKBONE.OUT_CHANNELS #[1024, 512, 512, 256, 256, 256] # resnet50
+        self.out_channels = cfg.MODEL.BACKBONE.OUT_CHANNELS 
         output_channels = cfg.MODEL.BACKBONE.OUT_CHANNELS
         self.output_channels = output_channels
         image_channels = cfg.MODEL.BACKBONE.INPUT_CHANNELS
@@ -65,12 +60,6 @@ class ResNet_Experimental(nn.Module):
         # The conv4_x layer is the last object in our feature provider list.
         # Since stride arvariable in only the first block of a resnet layer we select the
         # last layer with the [-1] index and its first block with [0] in the self.feature_provider[-1][0]
-        conv4_block1 = self.feature_provider[-1][0]
-
-        conv4_block1.conv1.stride = (1, 1)  # changing the stride to 1x1
-        conv4_block1.conv2.stride = (1, 1)  # changing the stride to 1x1
-        conv4_block1.downsample[0].stride = (
-            1, 1)  # changing the stride to 1x1
         
         '''
         
@@ -88,7 +77,7 @@ class ResNet_Experimental(nn.Module):
         # +BATCHNORM and switched ReLU order
         # out of bank2 -> 512 x 19 x 19
         '''
-        # Custom convolution layers
+        # Custom convolution layers features scaling
         self.bank2 = nn.Sequential(
             nn.Conv2d(
                 in_channels = self.output_channels[0],
@@ -157,57 +146,26 @@ class ResNet_Experimental(nn.Module):
         self.feature_extractor = nn.ModuleList([self.bank1, self.bank2, self.bank3, self.bank4, self.bank5, self.bank6])
     
     def _build_layer(self, input_size,output_size, layer_no, channels, stride=2, padding=1):
-        '''self.additional_blocks = []
-        if layer_no <= 3:
-            layer = nn.Sequential(
-                    nn.Conv2d(input_size, channels, kernel_size=1, bias=False),
-                    nn.BatchNorm2d(channels),
-                    nn.ReLU(inplace=True),
-                    nn.Conv2d(channels, output_size, kernel_size=3, padding=1, stride=2, bias=False),
-                    nn.BatchNorm2d(output_size),
-                    nn.ReLU(inplace=True),
-                )
-            
-        else:
-            layer = nn.Sequential(
-                    nn.Conv2d(input_size, channels, kernel_size=1, bias=False),
-                    nn.BatchNorm2d(channels),
-                    nn.ReLU(inplace=True),
-                    nn.Conv2d(channels, output_size, kernel_size=3, bias=False),
-                    nn.BatchNorm2d(output_size),
-                    nn.ReLU(inplace=True),
-                )
-        '''
-        
         layer = nn.Sequential(
-            nn.Conv2d(
-                in_channels = input_size,
-                out_channels = output_size,
-                kernel_size=3,
-                stride=stride,
-                padding=padding
-            ),
-            Mish(),
-            nn.BatchNorm2d(output_size),
-        )
+                nn.Conv2d(
+                    in_channels = input_size,
+                    out_channels = output_size,
+                    kernel_size=3,
+                    stride=stride,
+                    padding=padding
+                ),
+                Mish(),
+                nn.BatchNorm2d(output_size),
+                )
         return layer
 
     def forward(self, x):
-        out_features = []
-        idx=0
-        for feature in self.feature_extractor:
-
+        out = []
+        for idx, feature in enumerate(self.feature_extractor):
             x = feature(x)
             if idx == 0:
                 x = self.l2_norm(x)  # Conv4_3 L2 normalization
 
-            out_features.append(x)
-            idx +=1
+            out.append(x)
 
-        """
-        for idx, feature in enumerate(out_features):
-            expected_shape = (out_channel, feature_map_size, feature_map_size)
-            assert feature.shape[1:] == expected_shape, \
-                f"Expected shape: {expected_shape}, got: {feature.shape[1:]} at output IDX: {idx}"
-        """
         return tuple(out_features)
