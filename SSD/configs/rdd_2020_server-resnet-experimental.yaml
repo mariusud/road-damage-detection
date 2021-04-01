@@ -12,12 +12,12 @@ DATASETS:
     TRAIN: ("rdd2020_train",)
     TEST: ("rdd2020_val", )
 SOLVER:
-    MAX_ITER: 15000
+    MAX_ITER: 30000
     GAMMA: 0.1
     BATCH_SIZE: 16
     MOMENTUM: 0.9
     LR: 2e-3
-EVAL_STEP: 5000
-MODEL_SAVE_STEP: 2500
-OUTPUT_DIR: 'outputs/rdd_2020_resnet_experimental-custom'
+EVAL_STEP: 2000
+MODEL_SAVE_STEP: 1000
+OUTPUT_DIR: 'outputs/rdd_2020_resnet_experimental-50-mish'
 DATASET_DIR: "/work/datasets"
