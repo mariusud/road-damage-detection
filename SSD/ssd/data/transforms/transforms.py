@@ -272,3 +272,46 @@ class RandomMirror(object):
             boxes = boxes.copy()
             boxes[:, 0::2] = width - boxes[:, 2::-2]
         return image, boxes, classes
+
+## Date augmentation methods used in "A Method of Data Augmentation for Classifying Road Damage Considering Influence on Classification Accuracy" ##
+
+class AddRandomPixelValue(object):
+    def __call__(self, image, boxes, classes):
+        if random.randint(2) and (1 or 2) in classes:
+            image = image + random.uniform(-40,40)
+            image[image > 255] = 255
+            image[image < 0] = 0
+        return image, boxes, classes
+    
+class AverageNeighborBlur(object):
+    def __call__(self, image, boxes, classes):
+        if random.randint(2) and (1 or 2 or 4) in classes:
+            image = cv2.blur(image,(5,5))
+        return image, boxes, classes
+    
+class GaussianBlur(object):
+    def __call__(self, image, boxes, classes):
+        if random.randint(2) and (2) in classes:
+            image = cv2.GaussianBlur(image,(5,5),0)
+        return image, boxes, classes
+    
+class IvertPixels(object):
+    def __call__(self, image, boxes, classes):
+        if random.randint(2) and (1 or 4) in classes:
+            image = 255-image
+        return image, boxes, classes
+    
+class RandomScalePixelValue(object):
+    def __call__(self, image, boxes, classes):
+        if random.randint(2) and (1 or 2) in classes:
+            scale = random.uniform(0.5, 1.5)
+            image = scale*image
+            image[image > 255] = 255
+            image[image < 0] = 0
+        return image, boxes, classes
+    
+#class BlackenRandomPixels(object):
+    #def __call__(self, image, boxes, classes):
+     #   image = cv2.GaussianBlur(img,(5,5),0)
+      #  return image, boxes, classes
+
