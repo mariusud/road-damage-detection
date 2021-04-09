@@ -6,9 +6,10 @@ import json
 import zipfile
 import tqdm
 import tempfile
+import shutil
 
 
-zip_url = ""
+zip_url = "http://oppdal.idi.ntnu.no:35689/images.zip"
 dataset_path = pathlib.Path("datasets", "tdt4265")
 
 
@@ -91,14 +92,7 @@ def make_image_symlinks(work_dataset, target_path):
 
 
 def download_image_zip(zip_path):
-    print("Automatic download of images  is currently not supported.")
-    print(f"Download the zip file and place it in the path: {zip_path.absolute()}")
-    print("You can download the zip containing all images with scp:")
-    print(f"\t scp oppdal.idi.ntnu.no:/work/datasets/images.zip {zip_path.absolute()}")
-    print("Or you can manually download it from:")
-    print("\t https://s.ntnu.no/tdt4265-dataset-images")
-    print(f"Then place it at the **exact path**: {zip_path.absolute()}")
-    exit()
+
     response = requests.get(zip_url, stream=True)
     total_length = int(response.headers.get("content-length"))
     assert response.status_code == 200, \
@@ -126,6 +120,10 @@ def download_images():
         return
     zip_path = pathlib.Path("datasets", "tdt4265", "images.zip")
     if not zip_path.is_file():
+        print("The current download server does not allow for concurrent downloads.")
+        print("If the download does not start, you can download it from the server with scp (or the windows equivalent):")
+        print(f"\t scp oppdal.idi.ntnu.no:/work/datasets/images.zip {zip_path.absolute()}")
+        print(f"Download the zip file and place it in the path: {zip_path.absolute()}")
         download_image_zip(zip_path)
     with zipfile.ZipFile(zip_path, "r") as fp:
         fp.extractall(dataset_path)
@@ -133,6 +131,9 @@ def download_images():
 if __name__ == "__main__":
     # Download labels
     request_wrapper = RequestWrapper()
+    if dataset_path.is_dir():
+        print("Removing old dataset in:", dataset_path.absolute())
+        shutil.rmtree(dataset_path)
     dataset_path.mkdir(exist_ok=True, parents=True)
     download_images()
     download_labels(request_wrapper)

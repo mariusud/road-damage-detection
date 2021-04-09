@@ -35,8 +35,7 @@ if __name__ == "__main__":
     zip_path = dataset_path.parent.joinpath("rdd2020.zip")
     if not zip_path.is_file():
         download_image_zip(zip_path)
-    else:
-        print("Extracting dataset")
-        with zipfile.ZipFile(zip_path, "r") as fp:
-            fp.extractall(dataset_path.parent)
+    print("Extracting dataset")
+    with zipfile.ZipFile(zip_path, "r") as fp:
+        fp.extractall(dataset_path.parent)
     print("Dataset setup finished. Extracted to:", dataset_path)

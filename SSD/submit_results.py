@@ -53,12 +53,12 @@ def get_detections(cfg, ckpt):
             assert label != "__background__"
             score = float(scores[idx])
             assert box.shape == (4,)
-            xmin, ymin, xmax, ymax = box
+            xmin, ymin, xmax, ymax = box.tolist()
             width = xmax - xmin
             height = ymax - ymin
             detections.append(
                 {
-                    "image_id": image_path.stem,
+                    "image_id": int(image_path.stem),
                     "category_id": LABEL_MAP[label],
                     "score": score,
                     "bbox": [xmin, ymin, width, height]
