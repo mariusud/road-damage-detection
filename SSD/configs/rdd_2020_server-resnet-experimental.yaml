@@ -26,6 +26,6 @@ SOLVER:
     MOMENTUM: 0.9
     LR: 2e-3
 EVAL_STEP: 2000
-MODEL_SAVE_STEP: 2000
-OUTPUT_DIR: 'outputs/aspect_ratios_smaller_sizes2_widenet_moreboxes'
+MODEL_SAVE_STEP: 1000
+OUTPUT_DIR: 'outputs/rdd_2020_experimental-custom'
 DATASET_DIR: "/work/datasets"

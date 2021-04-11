@@ -61,6 +61,7 @@ def run_demo(cfg, ckpt, score_threshold, images_dir: pathlib.Path, output_dir: p
         im = Image.fromarray(drawn_image)
         output_path = output_dir.joinpath(f"{image_name}.png")
         im.save(output_path)
+        print(output_path)
     return drawn_images
 
 
@@ -76,7 +77,7 @@ def main():
     parser.add_argument("--ckpt", type=str, default=None, help="Trained weights.")
     parser.add_argument("--score_threshold", type=float, default=0.7)
     parser.add_argument("--images_dir", default='demo/voc', type=str, help='Specify a image dir to do prediction.')
-    parser.add_argument("--dataset_type", default="voc", type=str, help='Specify dataset type.')
+    parser.add_argument("--dataset_type", default="tdt4265", type=str, help='Specify dataset type.')
 
     parser.add_argument(
         "opts",

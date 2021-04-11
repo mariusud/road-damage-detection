@@ -5,6 +5,11 @@ from ssd.modeling.box_head.box_head import SSDBoxHead
 from ssd.utils.model_zoo import load_state_dict_from_url
 from ssd import torch_utils
 import torchvision.models as models
+<<<<<<< HEAD
+
+#from ssd.modeling.backbone.test_resnet import ResNet
+=======
+>>>>>>> 219c6bae3a4ec91a94d71a7ef5129c288972d337
 from ssd.modeling.backbone.resnet_experimental import ResNet_Experimental
 
 
