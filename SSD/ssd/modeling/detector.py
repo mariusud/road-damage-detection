@@ -8,8 +8,6 @@ import torchvision.models as models
 
 from ssd.modeling.backbone.ssd512 import SSD512
 
-
-
 class SSDDetector(nn.Module):
     def __init__(self, cfg):
         super().__init__()
@@ -37,6 +35,8 @@ def build_backbone(cfg):
     if backbone_name == "basic":
         model = Second_Improved_BasicModel(cfg)
         return model
+    if backbone_name == "SSD512":
+        return SSD512(cfg)
     if backbone_name == "resnet_experimental":
         return ResNet_Experimental(cfg)
     if backbone_name == "SSD512":
