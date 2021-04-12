@@ -7,8 +7,6 @@ from PIL import Image
 
 
 
-
-   
 class TDT4265Dataset(torch.utils.data.Dataset):
 
     class_names = ('__background__',
@@ -23,12 +21,27 @@ class TDT4265Dataset(torch.utils.data.Dataset):
         self.data_dir = data_dir
         self.transform = transform
         self.target_transform = target_transform
-        self.labels = self.read_labels(data_dir.joinpath("labels.json"))
-        self.validate_dataset()
-        self.image_ids = self.remove_empty_images()
-        self.image_ids = self.split_dataset(split)
+        if split == "test":
+            self.labels = self.read_labels(data_dir.parent.joinpath("labels_test.json"))
+        else:
+            self.split = split
+            self.labels = self.read_labels(data_dir.parent.joinpath("labels.json"))
+            self.image_ids = self.split_dataset(split)
+            self.image_ids = self.filter_image_ids()
+            if split == "train":
+                self.image_ids = self.remove_empty_images()
+
+
         print(f"Dataset loaded. Subset: {split}, number of images: {len(self)}")
 
+    def filter_image_ids(self):
+        image_ids_with_image_file = []
+        for image_id in self.image_ids:
+            image_path = self.data_dir.joinpath(f"{image_id}.jpg")
+            if not image_path.is_file():
+                continue
+            image_ids_with_image_file.append(image_id)
+        return image_ids_with_image_file
 
     def remove_empty_images(self):
         """
@@ -40,12 +53,9 @@ class TDT4265Dataset(torch.utils.data.Dataset):
             if len(labels) == 0:
                 continue
             keep_idx.append(idx)
-        return [self.image_ids[idx] for idx in keep_idx]
+        image_ids = [self.image_ids[idx] for idx in keep_idx]
+        return image_ids
 
-    def validate_dataset(self):
-        for image_id in self.image_ids:
-            assert image_id in self.labels,\
-                f"Did not find label for image {image_id} in labels"
 
     def get_categoryId_to_label_idx(self, labels):
         categories = labels["categories"]
@@ -63,12 +73,13 @@ class TDT4265Dataset(torch.utils.data.Dataset):
             f"Did not find label file: {label_path.absolute()}"
         with open(label_path, "r") as fp:
             labels = json.load(fp)
-        self.image_ids = [
-            x["image_id"] for x in labels["annotations"]
-        ]
+        self.image_ids = list(set([x["id"] for x in labels["images"]]))
         labels_processed = {
-            x["image_id"]: {"bboxes": [], "labels": []}
-            for x in labels["annotations"]
+            image_id: {"bboxes": [], "labels": []}
+            for image_id in self.image_ids
+        }
+        self.image_info = {
+            x["id"]: x for x in labels["images"]
         }
         category2label = self.get_categoryId_to_label_idx(labels)
         for label in labels["annotations"]:
@@ -83,8 +94,9 @@ class TDT4265Dataset(torch.utils.data.Dataset):
         return labels_processed
 
     def __getitem__(self, index):
+        image_id = self.image_ids[index]
         boxes, labels = self.get_annotation(index)
-        image = self._read_image(index)
+        image = self._read_image(image_id)
         if self.transform:
             image, boxes, labels = self.transform(image, boxes, labels)
         if self.target_transform:
@@ -117,25 +129,13 @@ class TDT4265Dataset(torch.utils.data.Dataset):
         image_id = self.image_ids[index]
         return self._get_annotation(image_id)
 
-    def _read_image(self, index):
-        image_id = self.image_ids[index]
-        image_path = self.data_dir.joinpath("images").joinpath(f"{image_id}.jpg")
+    def _read_image(self, image_id):
+        image_path = self.data_dir.joinpath(f"{image_id}.jpg")
         assert image_path.is_file(), image_path
         image = Image.open(str(image_path)).convert("RGB")
         image = np.array(image)
         return image
 
-    def remove_empty_images(self):
-        """
-            Removes any images without objects for training
-        """
-        keep_idx = []
-        for idx in range(len(self)):
-            boxes, labels = self.get_annotation(idx)
-            if len(labels) == 0:
-                continue
-            keep_idx.append(idx)
-        return [self.image_ids[idx] for idx in keep_idx]
-
     def get_img_info(self, index):
-        return {"height": 960, "width": 1280}
+        image_id = self.image_ids[index]
+        return self.image_info[image_id]
