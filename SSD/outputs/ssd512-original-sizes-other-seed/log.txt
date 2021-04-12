@@ -6058,3 +6058,9 @@ TEST:
 2021-04-12 13:47:25,035 SSD.trainer INFO: Total training time: 0:00:03 (0.0001 s / it)
 2021-04-12 13:47:33,809 SSD INFO: Start evaluating...
 2021-04-12 13:47:33,816 SSD.inference INFO: Evaluating rdd2020_val dataset(3659 images):
+2021-04-12 14:18:49,064 SSD.inference INFO: mAP: 0.4511
+D00             : 0.4091
+D10             : 0.2786
+D20             : 0.5784
+D40             : 0.5384
+
