@@ -5,12 +5,8 @@ from ssd.modeling.box_head.box_head import SSDBoxHead
 from ssd.utils.model_zoo import load_state_dict_from_url
 from ssd import torch_utils
 import torchvision.models as models
-<<<<<<< HEAD
 
-#from ssd.modeling.backbone.test_resnet import ResNet
-=======
->>>>>>> 219c6bae3a4ec91a94d71a7ef5129c288972d337
-from ssd.modeling.backbone.resnet_experimental import ResNet_Experimental
+from ssd.modeling.backbone.ssd512 import SSD512
 
 
 
@@ -43,6 +39,8 @@ def build_backbone(cfg):
         return model
     if backbone_name == "resnet_experimental":
         return ResNet_Experimental(cfg)
+    if backbone_name == "SSD512":
+        return SSD512(cfg)
     if backbone_name == "vgg":
         model = VGG(cfg)
         if cfg.MODEL.BACKBONE.PRETRAINED:
