@@ -3,6 +3,7 @@ import torch
 import cv2
 import numpy as np
 from numpy import random
+import imgaug.augmenters as iaa
 
 
 def intersect(box_a, box_b):
@@ -414,6 +415,40 @@ class ClassSpesificTransforms(object):
             image = seq(image=image)
         return image, boxes, classes
 
+class ClassSpesificTransforms2(object):
+    def __call__(self, image, boxes, classes):
+        if random.randint(2):
+            class_trans = random.choice(classes)
+            if class_trans == 1:
+                aug = iaa.OneOf([
+                    iaa.Add((-40, 40)),
+                    iaa.AverageBlur(k=(2, 11)),
+                    iaa.Invert(1),
+                    iaa.Multiply((0.5, 1.5))
+                ])
+                image = aug(image=image)
+
+            if class_trans == 2:
+                aug = iaa.OneOf([
+                    iaa.Add((-40, 40)),
+                    iaa.AverageBlur(k=(2, 11)),
+                    iaa.Emboss(alpha=(0.0, 1.0), strength=(0.5, 1.5)),
+                    iaa.GaussianBlur(sigma=(0.0, 3.0))
+                ])
+                image = aug(image=image)
+            if class_trans == 4:
+                aug = iaa.OneOf([
+                    iaa.AverageBlur(k=(2, 11)),
+                    iaa.Dropout(p=0.02),
+                    #9: Flip horizontally (allready done, for class 4 otherwise)
+                    iaa.Invert(1),
+                    iaa.Pepper(0.05)
+                ])
+                image = aug(image=image)
+            
+        return image, boxes, classes    
+
+    
 """class ClassSpesificTransforms(object):
     def __call__(self, image, boxes, classes):
         if random.randint(2): 
