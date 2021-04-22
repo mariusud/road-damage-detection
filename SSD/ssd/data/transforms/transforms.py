@@ -3,7 +3,11 @@ import torch
 import cv2
 import numpy as np
 from numpy import random
+<<<<<<< HEAD
 import imgaug.augmenters as iaa
+=======
+import imgaug as iaa
+>>>>>>> 3d20610b714c5554a8ade3d0da04c4ecfc87628f
 
 
 def intersect(box_a, box_b):
@@ -448,7 +452,6 @@ class ClassSpesificTransforms2(object):
             
         return image, boxes, classes    
 
-    
 """class ClassSpesificTransforms(object):
     def __call__(self, image, boxes, classes):
         if random.randint(2): 
