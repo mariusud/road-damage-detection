@@ -3,6 +3,11 @@ import torch
 import cv2
 import numpy as np
 from numpy import random
+<<<<<<< HEAD
+import imgaug.augmenters as iaa
+=======
+import imgaug as iaa
+>>>>>>> 3d20610b714c5554a8ade3d0da04c4ecfc87628f
 
 
 def intersect(box_a, box_b):
@@ -273,7 +278,7 @@ class RandomMirror(object):
             boxes[:, 0::2] = width - boxes[:, 2::-2]
         return image, boxes, classes
 
-## Date augmentation methods used in "A Method of Data Augmentation for Classifying Road Damage Considering Influence on Classification Accuracy" ##
+## Data augmentation methods used in "A Method of Data Augmentation for Classifying Road Damage Considering Influence on Classification Accuracy" ##
 
 class AddRandomPixelValue(object):
     def __call__(self, image, boxes, classes):
@@ -310,8 +315,171 @@ class RandomScalePixelValue(object):
             image[image < 0] = 0
         return image, boxes, classes
     
-#class BlackenRandomPixels(object):
-    #def __call__(self, image, boxes, classes):
-     #   image = cv2.GaussianBlur(img,(5,5),0)
-      #  return image, boxes, classes
+class EmbossAndMerge(object):
+    def __call__(self, image, boxes, classes):
+        if random.randint(2) and (2) in classes:
+            seq = iaa.Sequential([
+                iaa.Emboss(alpha=(0.0, 1.0), strength=(0.5, 1.5))
+            ])
+            image = seq(image=image)
+            return image, boxes, classes
+        
+class DropOut(object):
+    def __call__(self, image, boxes, classes):
+        if random.randint(2) and (2) in classes:
+            seq = iaa.Sequential([
+                iaa.Dropout(p=(0.02, 0.02)),
+            ])
+            image = seq(image=image)
+            return image, boxes, classes
+    
+class D00Transforms(object):
+    def __call__(self, image, boxes, classes):
+        if random.randint(2) and (1) in classes:
+            # AddRandomPixelValue()
+            transforms.append(iaa.Add((-40, 40)))
+            # AverageNeighborBlur(image, boxes, classes)
+            transforms.append(iaa.AverageBlur(k=(2, 11)))
+            # GaussianBlur(image, boxes, classes)
+            transforms.append(iaa.GaussianBlur(sigma=(0.0, 3.0)))
+            # IvertPixels(image, boxes, classes)
+            transforms.append(iaa.Invert(1))
+            # RandomScalePixelValue(image, boxes, classes)
+            transforms.append(iaa.Multiply((0.5, 1.5)))
+            seq = iaa.Sequential(transforms)
+            image = seq(image=image)
+        return image, boxes, classes
+
+class D10Transforms(object):
+    def __call__(self, image, boxes, classes):
+        if random.randint(2) and (2) in classes:
+            transforms = []
+            # AddRandomPixelValue()
+            transforms.append(iaa.Add((-40, 40)))
+            # AverageNeighborBlur(image, boxes, classes)
+            transforms.append(iaa.AverageBlur(k=(2, 11)))
+            #8: Emboss an image and merge with the original image
+            transforms.append(iaa.Emboss(alpha=(0.0, 1.0), strength=(0.5, 1.5)))
+            # GaussianBlur(image, boxes, classes)
+            transforms.append(iaa.GaussianBlur(sigma=(0.0, 3.0)))
+            # RandomScalePixelValue(image, boxes, classes)
+            transforms.append(iaa.Multiply((0.5, 1.5)))
+            seq = iaa.Sequential(transforms)
+            image = seq(image=image)
+        return image, boxes, classes
+    
+class D40Transforms(object):
+    def __call__(self, image, boxes, classes):
+        if random.randint(2) and (4) in classes:
+            transforms = []
+            #3: AverageNeighborBlur(image, boxes, classes)
+            transforms.append(iaa.AverageBlur(k=(2, 11)))
+            #4: Convert 2% of all pixels to black pixels and drop the information
+            transforms.append(iaa.Dropout(p=0.02))
+            #9: Flip horizontally (allready done)
+            #IvertPixels(image, boxes, classes)
+            transforms.append(iaa.Invert(1))
+            #14: Add pepper noises at 5% of all pixels
+            transforms.append(iaa.Pepper(0.05))
+            seq = iaa.Sequential(transforms)
+            image = seq(image=image)
+        return image, boxes, classes
+        
+        
+class ClassSpesificTransforms(object):
+    def __call__(self, image, boxes, classes):
+        if random.randint(2):
+            transforms = []
+            if (1 or 2) in classes:
+                #AddRandomPixelValue
+                transforms.append(iaa.Add((-40, 40)))
+            if (1 or 2 or 4) in classes:
+                #AverageNeighborBlur
+                transforms.append(iaa.AverageBlur(k=(2, 11)))
+            if (4) in classes:
+                #4: Convert 2% of all pixels to black pixels and drop the information (class 4)
+                transforms.append(iaa.Dropout(p=0.02))
+            if (2) in classes:
+                #8: Emboss an image and merge with the original image (class 2)
+                transforms.append(iaa.Emboss(alpha=(0.0, 1.0), strength=(0.5, 1.5)))
+            #9: Flip horizontally (allready done, for class 4 otherwise)
+            if (2) in classes:
+                #image, boxes, classes = GaussianBlur(image, boxes, classes)
+                transforms.append(iaa.GaussianBlur(sigma=(0.0, 3.0)))
+            if (1 or 4) in classes:
+                #image, boxes, classes = IvertPixels(image, boxes, classes)
+                transforms.append(iaa.Invert(1))
+            if (1 or 2) in classes:
+                #image, boxes, classes = RandomScalePixelValue(image, boxes, classes)
+                transforms.append(iaa.Multiply((0.5, 1.5)))
+            if (4) in classes:
+                #14: Add pepper noises at 5% of all pixels (class 4)
+                transforms.append(iaa.Pepper(0.05))
+            seq = iaa.Sequential(transforms)
+            image = seq(image=image)
+        return image, boxes, classes
+
+class ClassSpesificTransforms2(object):
+    def __call__(self, image, boxes, classes):
+        if random.randint(2):
+            class_trans = random.choice(classes)
+            if class_trans == 1:
+                aug = iaa.OneOf([
+                    iaa.Add((-40, 40)),
+                    iaa.AverageBlur(k=(2, 11)),
+                    iaa.Invert(1),
+                    iaa.Multiply((0.5, 1.5))
+                ])
+                image = aug(image=image)
+
+            if class_trans == 2:
+                aug = iaa.OneOf([
+                    iaa.Add((-40, 40)),
+                    iaa.AverageBlur(k=(2, 11)),
+                    iaa.Emboss(alpha=(0.0, 1.0), strength=(0.5, 1.5)),
+                    iaa.GaussianBlur(sigma=(0.0, 3.0))
+                ])
+                image = aug(image=image)
+            if class_trans == 4:
+                aug = iaa.OneOf([
+                    iaa.AverageBlur(k=(2, 11)),
+                    iaa.Dropout(p=0.02),
+                    #9: Flip horizontally (allready done, for class 4 otherwise)
+                    iaa.Invert(1),
+                    iaa.Pepper(0.05)
+                ])
+                image = aug(image=image)
+            
+        return image, boxes, classes    
+
+"""class ClassSpesificTransforms(object):
+    def __call__(self, image, boxes, classes):
+        if random.randint(2): 
+            if (1 or 2) in classes:
+                #image, boxes, classes = AddRandomPixelValue()
+                image = image + random.uniform(-40,40)
+                image[image > 255] = 255
+                image[image < 0] = 0
+            if (1 or 2 or 4) in classes:
+                #image, boxes, classes = AverageNeighborBlur(image, boxes, classes)
+                image = cv2.blur(image,(5,5))
+            #4: Convert 2% of all pixels to black pixels and drop the information (class 4)
+            #8: Emboss an image and merge with the original image (class 2)
+            
+            #9: Flip horizontally (allready done, for class 4 otherwise)
+            if (2) in classes:
+                #image, boxes, classes = GaussianBlur(image, boxes, classes)
+                image = cv2.GaussianBlur(image,(5,5),0)
+            if (1 or 4) in classes:
+                #image, boxes, classes = IvertPixels(image, boxes, classes)
+                image = 255-image
+            if (1 or 2) in classes:
+                #image, boxes, classes = RandomScalePixelValue(image, boxes, classes)
+                scale = random.uniform(0.5, 1.5)
+                image = scale*image
+                image[image > 255] = 255
+                image[image < 0] = 0
+            #14: Add pepper noises at 5% of all pixels (class 4)
+        return image, boxes, classes"""
+
 
