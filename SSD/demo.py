@@ -76,7 +76,7 @@ def main():
     )
     parser.add_argument("--ckpt", type=str, default=None, help="Trained weights.")
     parser.add_argument("--score_threshold", type=float, default=0.7)
-    parser.add_argument("--images_dir", default='demo/voc', type=str, help='Specify a image dir to do prediction.')
+    parser.add_argument("--images_dir", default='demo/rdd', type=str, help='Specify a image dir to do prediction.')
     parser.add_argument("--dataset_type", default="tdt4265", type=str, help='Specify dataset type.')
 
     parser.add_argument(

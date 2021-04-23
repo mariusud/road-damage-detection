@@ -162,5 +162,5 @@ def soft_nms_pytorch(dets, box_scores, sigma=0.5, thresh=0.001, cuda=1):
 
     # select the boxes and keep the corresponding indexes
     keep = dets[:, 4][scores > thresh]
-    return keep.to(torch.int64)
+    return keep.to(torch.int64) #customized by us
 

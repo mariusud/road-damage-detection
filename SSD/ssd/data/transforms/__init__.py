@@ -6,15 +6,15 @@ from .transforms import *
 def build_transforms(cfg, is_train=True):
     if is_train:
         transform = [
-            #AddRandomPixelValue(), #aug from RoadDamage paper
-            #RandomScalePixelValue(), #aug from RoadDamage paper
-            #IvertPixels(), #aug from RoadDamage paper
+            AddRandomPixelValue(), #aug from RoadDamage paper
+            RandomScalePixelValue(), #aug from RoadDamage paper
+            IvertPixels(), #aug from RoadDamage paper
             RandomSampleCrop(), #aug from SSD paper
             RandomMirror(), #aug from SSD paper
             ConvertFromInts(),
             ToPercentCoords(),
-            #AverageNeighborBlur(), #aug from RoadDamage paper
-            #GaussianBlur(), #aug from RoadDamage paper
+            AverageNeighborBlur(), #aug from RoadDamage paper
+            GaussianBlur(), #aug from RoadDamage paper
             Resize(cfg.INPUT.IMAGE_SIZE),
             SubtractMeans(cfg.INPUT.PIXEL_MEAN, cfg.INPUT.PIXEL_STD),
             ToTensor(),

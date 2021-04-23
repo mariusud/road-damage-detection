@@ -38,9 +38,6 @@ class L2Norm(nn.Module):
         return out
 
 class SSD512(nn.Module):
-    # The resnet backbone is to be used as a feature provider.
-    # For 300x300 we expect a 38x38 feature map
-
     def __init__(self, cfg):
         super().__init__()
         self.out_channels = cfg.MODEL.BACKBONE.OUT_CHANNELS 
@@ -75,19 +72,35 @@ class SSD512(nn.Module):
         conv4_block1.conv1.stride = (1,1)
         conv4_block1.conv2.stride = (1,1)
         conv4_block1.downsample[0].stride = (1,1)
-        self.bank1.add_module("conv5_1",nn.Conv2d(1024,512, kernel_size=1))
         
-        self.conv12_1 = nn.Conv2d(256, 128, kernel_size=1)
-        self.conv12_2 = nn.Conv2d(128, 256, kernel_size=4, padding=1)
+        #print(conv4_block1)
+        #Additional downsampling 
+        self.bank1.add_module("downsample_0",nn.Conv2d(1024,512, kernel_size=1))
         
-        self.bank8 = nn.Sequential(self.conv12_1, self.conv12_2)
-
-        self.bank2 = self._build_layer(self.output_channels[0], self.output_channels[1],2, 512)
-        self.bank3 = self._build_layer(self.output_channels[1], self.output_channels[2],3, 1024)
+        self.bank8 = nn.Sequential(
+                nn.Conv2d(
+                    in_channels = 256,
+                    out_channels = 128,
+                    kernel_size=1,
+                ),
+                nn.BatchNorm2d(128),
+                Mish(),
+                nn.Conv2d(
+                    in_channels = 128,
+                    out_channels = 256,
+                    kernel_size=4,
+                    padding=1
+                ),
+                nn.BatchNorm2d(256),
+                Mish(),
+            
+                )
+        self.bank2 = self._build_layer(self.output_channels[0], self.output_channels[1],2, 1024)
+        self.bank3 = self._build_layer(self.output_channels[1], self.output_channels[2],3, 512)
         self.bank4 = self._build_layer(self.output_channels[2], self.output_channels[3],4, 256)
         self.bank5 = self._build_layer(self.output_channels[3],self.output_channels[4],5, 128)
         self.bank6 = self._build_layer(self.output_channels[4],self.output_channels[5],6, 128)
-        self.bank7 = self._build_layer(self.output_channels[5],self.output_channels[6],7, 128, stride=1,padding=0)
+        #self.bank7 = self._build_layer(self.output_channels[5],self.output_channels[6],7, 128, stride=1,padding=0)
         
         self.feature_extractor = nn.ModuleList([self.bank1, self.bank2, self.bank3, self.bank4, self.bank5, self.bank6, self.bank8])
     
@@ -114,32 +127,7 @@ class SSD512(nn.Module):
             
                 )
         return layer
-    
-    def _build_fat_layer(self, input_size,output_size, layer_no, channels, stride=2, padding=1, dilation=0):
-        layer = nn.Sequential(
-                nn.Conv2d(
-                    in_channels = input_size,
-                    out_channels = channels,
-                    kernel_size=1,
-                    stride=1,
-                    padding=0
-                ),
-                nn.BatchNorm2d(channels),
-                Mish(),
-                nn.Conv2d(
-                    in_channels = channels,
-                    out_channels = output_size,
-                    kernel_size=3,
-                    stride=stride,
-                    padding=padding
-                ),
-                nn.BatchNorm2d(output_size),
-                Mish(),
-            
-                )
-        return layer
-    
-    
+
     def forward(self, x):
         out = []
         for idx, feature in enumerate(self.feature_extractor):

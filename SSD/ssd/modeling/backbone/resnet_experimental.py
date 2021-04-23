@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
-from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
+from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152, resnext50_32x4d, wide_resnet50_2
 
 # https://github.com/bicycleman15/SSD-ResNet-PyTorch/blob/master/models/resnet50_backbone.py
 # https://github.com/NVIDIA/DeepLearningExamples/blob/master/PyTorch/Detection/SSD/src/model.py
@@ -63,11 +63,12 @@ class ResNet_Experimental(nn.Module):
         
         '''
         
-        backbone = resnet101(pretrained=True)
+        backbone = wide_resnet50_2(pretrained=True)
         
         # out of bank1 -> 1024 x 38 x 38
         # source https://github.com/NVIDIA/DeepLearningExamples/blob/master/PyTorch/Detection/SSD/src/model.py
         self.bank1 = nn.Sequential(*list(backbone.children())[:7])
+        
         conv4_block1 = self.bank1[-1][0]
         conv4_block1.conv1.stride = (1,1)
         conv4_block1.conv2.stride = (1,1)
@@ -149,23 +150,32 @@ class ResNet_Experimental(nn.Module):
         layer = nn.Sequential(
                 nn.Conv2d(
                     in_channels = input_size,
+                    out_channels = channels,
+                    kernel_size=1,
+                    stride=1,
+                    padding=0
+                ),
+                nn.BatchNorm2d(channels),
+                Mish(),
+                nn.Conv2d(
+                    in_channels = channels,
                     out_channels = output_size,
                     kernel_size=3,
                     stride=stride,
                     padding=padding
                 ),
-                Mish(),
                 nn.BatchNorm2d(output_size),
+                Mish(),
+            
                 )
         return layer
-
+    
     def forward(self, x):
         out = []
         for idx, feature in enumerate(self.feature_extractor):
             x = feature(x)
-            if idx == 0:
-                x = self.l2_norm(x)  # Conv4_3 L2 normalization
-
+            #if idx == 0:
+                #x = self.l2_norm(x)  # Conv4_3 L2 normalization
             out.append(x)
 
         return tuple(out)
