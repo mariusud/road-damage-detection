@@ -34,6 +34,7 @@ def start_train(cfg):
     logger = logging.getLogger('SSD.trainer')
     model = SSDDetector(cfg)
     model = torch_utils.to_cuda(model)
+    model.load_state_dict(torch.load('model_params/params.pt'),strict=False)
     
     optimizer = torch.optim.SGD(
         model.parameters(),
