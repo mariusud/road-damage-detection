@@ -1,7 +1,7 @@
 MODEL:
     NUM_CLASSES: 5
     BACKBONE:
-        NAME: 'resnet_experimental'
+        NAME: 'SSD300'
         PRETRAINED: True
         OUT_CHANNELS: [1024, 512, 512, 256, 256, 256]
         INPUT_CHANNELS: 3
@@ -29,6 +29,6 @@ SOLVER:
         GAMMA: 0.1
 EVAL_STEP: 1000
 MODEL_SAVE_STEP: 1000
-OUTPUT_DIR: 'outputs/wide_resnet-x-600-moreboxes-scheduler'
+OUTPUT_DIR: 'outputs/SSD300'
 DATASET_DIR: "/work/datasets"
 SOFT_NMS: False
