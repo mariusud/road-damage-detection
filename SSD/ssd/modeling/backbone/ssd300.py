@@ -3,10 +3,6 @@ import torch
 import torch.nn.functional as F
 from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152, resnext50_32x4d, wide_resnet50_2
 
-# https://github.com/bicycleman15/SSD-ResNet-PyTorch/blob/master/models/resnet50_backbone.py
-# https://github.com/NVIDIA/DeepLearningExamples/blob/master/PyTorch/Detection/SSD/src/model.py
-
-
 class Mish(nn.Module):
     def __init__(self):
         super().__init__()
@@ -35,7 +31,7 @@ class L2Norm(nn.Module):
         out = self.weight.unsqueeze(0).unsqueeze(2).unsqueeze(3).expand_as(x) * x
         return out
 
-class ResNet_Experimental(nn.Module):
+class SSD300(nn.Module):
     # The resnet backbone is to be used as a feature provider.
     # For 300x300 we expect a 38x38 feature map
 
@@ -49,24 +45,8 @@ class ResNet_Experimental(nn.Module):
 
         self.l2_norm = L2Norm(1024, scale=20)
 
-        '''
-        # Extracting the the required layers form the backbone
-        # nn.sequential converts the individial components extracted from resnet in a list to
-        # to continiuos nn object on which we can perform backprop
-        # Lets call this as our feautre provider. This provied us with the very first feature map [38x38] with 1024 channels
-        self.feature_provider = nn.Sequential(*list(backbone.children())[:7])
-        
-        # NOTE: But it is necessary to change the layer's stride else the feature provider will give a feature of 19x19
-        # The conv4_x layer is the last object in our feature provider list.
-        # Since stride arvariable in only the first block of a resnet layer we select the
-        # last layer with the [-1] index and its first block with [0] in the self.feature_provider[-1][0]
-        
-        '''
-        
         backbone = wide_resnet50_2(pretrained=True)
         
-        # out of bank1 -> 1024 x 38 x 38
-        # source https://github.com/NVIDIA/DeepLearningExamples/blob/master/PyTorch/Detection/SSD/src/model.py
         self.bank1 = nn.Sequential(*list(backbone.children())[:7])
         
         conv4_block1 = self.bank1[-1][0]
@@ -74,70 +54,6 @@ class ResNet_Experimental(nn.Module):
         conv4_block1.conv2.stride = (1,1)
         conv4_block1.downsample[0].stride = (1,1)
 
-        # HELT BASIC EXTRA FEATURE LAYERS
-        # +BATCHNORM and switched ReLU order
-        # out of bank2 -> 512 x 19 x 19
-        '''
-        # Custom convolution layers features scaling
-        self.bank2 = nn.Sequential(
-            nn.Conv2d(
-                in_channels = self.output_channels[0],
-                out_channels = self.output_channels[1],
-                kernel_size=3,
-                stride=2,
-                padding=1
-            ),
-            nn.ReLU(),
-            nn.BatchNorm2d(self.output_channels[1]),
-        )
-        # out -> 512 x 10 x 10
-        self.bank3 = nn.Sequential(
-            nn.Conv2d(
-                in_channels = self.output_channels[1],
-                out_channels = self.output_channels[2],
-                kernel_size=3,
-                stride=2,
-                padding=1
-            ),
-            nn.ReLU(),
-            nn.BatchNorm2d(self.output_channels[2]),
-        )
-        # out -> 256 x 5 x 5
-        self.bank4 = nn.Sequential(
-            nn.Conv2d(
-                in_channels = self.output_channels[2],
-                out_channels = self.output_channels[3],
-                kernel_size=3,
-                stride=2,
-                padding=1
-            ),
-            nn.ReLU(),
-            nn.BatchNorm2d(self.output_channels[3]),
-        )
-        # out of bank5 -> 256 x 3 x 3
-        self.bank5 = nn.Sequential(
-            nn.Conv2d(
-                in_channels = self.output_channels[3],
-                out_channels = self.output_channels[4],
-                kernel_size=3,
-                stride=2,
-                padding=1
-            ),
-            nn.ReLU(),
-            nn.BatchNorm2d(self.output_channels[4]),
-        )
-        # out of bank6 -> 128 x 1 x 1
-        self.bank6 = nn.Sequential(
-            nn.Conv2d(
-                in_channels = self.output_channels[4],
-                out_channels = self.output_channels[5],
-                kernel_size=3,
-                stride=1,
-                padding=0
-            ),
-            nn.ReLU(),
-            nn.BatchNorm2d(self.output_channels[5]),
-        )'''
         
         self.bank2 = self._build_layer(self.output_channels[0], self.output_channels[1],2, 256)
         self.bank3 = self._build_layer(self.output_channels[1], self.output_channels[2],3, 256)
@@ -174,8 +90,8 @@ class ResNet_Experimental(nn.Module):
         out = []
         for idx, feature in enumerate(self.feature_extractor):
             x = feature(x)
-            #if idx == 0:
-                #x = self.l2_norm(x)  # Conv4_3 L2 normalization
+            if idx == 0:
+                x = self.l2_norm(x)  # Conv4_3 L2 normalization
             out.append(x)
 
         return tuple(out)
